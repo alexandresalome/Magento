@@ -14,3 +14,15 @@ $model = Mage::getModel('adminhtml/config_data')
       ))
 ;
 $model->save();
+
+$model = Mage::getModel('adminhtml/config_data')
+      ->setSection('cataloginventory')
+      ->setGroups(array(
+          'item_options' => array(
+              'fields' => array(
+                  'manage_stock'      => array('value' => 0),
+              )
+          )
+      ))
+;
+$model->save();
