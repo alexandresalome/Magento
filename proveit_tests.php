@@ -92,10 +92,68 @@ class myQuickTest extends PHPUnit_Framework_TestCase
             ->click(Selenium\Locator::css('ul.checkout-types button.btn-checkout'))
             ->waitForPageToLoad(self::TIMEOUT)
         ;
-    }
 
-    public static function tearDownAfterClass()
-    {
-        self::$browser->stop();
+        // Check I'm on one page checkout
+        $location = self::$browser->getLocation();
+        $this->assertRegexp('#/checkout/onepage/$#', $location);
+
+        self::$browser
+            // Checkout as guest
+            ->click(Selenium\Locator::xpath('//label[@for="login:guest"]'))
+            ->click(Selenium\Locator::id('onepage-guest-register-button'))
+
+            // Billing
+            ->waitForCondition('selenium.browserbot.getCurrentWindow().document.getElementById("opc-billing").getAttribute("class").indexOf("active") !== false', self::TIMEOUT)
+            ->type(Selenium\Locator::id('billing:firstname'),    'Firstname')
+            ->type(Selenium\Locator::id('billing:lastname'),     'Lastname')
+            ->type(Selenium\Locator::id('billing:company'),      'Company')
+            ->type(Selenium\Locator::id('billing:email'),        'email@example.org')
+            ->type(Selenium\Locator::id('billing:street1'),      '1 rue de la facturation')
+            ->type(Selenium\Locator::id('billing:city'),         'Lille')
+            ->type(Selenium\Locator::id('billing:postcode'),     '59000')
+            ->type(Selenium\Locator::id('billing:telephone'),    '0671736698')
+            ->select(Selenium\Locator::id('billing:country_id'), 'France')
+            ->select(Selenium\Locator::id('billing:region_id'),  'Nord')
+            ->click(Selenium\Locator::css('#billing-buttons-container button'))
+
+            // Shipping method
+            ->waitForCondition('selenium.browserbot.getCurrentWindow().document.getElementById("opc-shipping_method").getAttribute("class").indexOf("active") !== false', self::TIMEOUT)
+
+        // @todo: quick-fix
+        ;sleep(2);self::$browser
+
+            ->click(Selenium\Locator::css('#shipping-method-buttons-container button'))
+
+            // Payment
+            ->waitForCondition('selenium.browserbot.getCurrentWindow().document.getElementById("opc-payment").getAttribute("class").indexOf("active") !== false', self::TIMEOUT)
+
+        // @todo: quick-fix
+        ;sleep(2);self::$browser
+
+            ->click(Selenium\Locator::xpath('//label[@for="p_method_checkmo"]'))
+            ->click(Selenium\Locator::css('#payment-buttons-container button'))
+
+            // Review
+            ->waitForCondition('selenium.browserbot.getCurrentWindow().document.getElementById("opc-review").getAttribute("class").indexOf("active") !== false', self::TIMEOUT)
+        ;
+
+        // @todo: quick-fix
+        sleep(2);
+
+        // Checks
+        $expected = '4 005,00 €';
+        $actual = self::$browser->getText(Selenium\Locator::css("#checkout-review-table tr.last td.last span.price"));
+        $this->assertEquals($expected, $actual);
+
+        // Place order
+        self::$browser
+            ->click(Selenium\Locator::css('#review-buttons-container button'))
+            ->waitForPageToLoad(self::TIMEOUT)
+        ;
+
+        // Check confirmation
+        $expected = 'Thank you for your purchase!';
+        $actual = self::$browser->getText(Selenium\Locator::css('div.col-main h2.sub-title'));
+        $this->assertEquals($expected, $actual);
     }
 }
