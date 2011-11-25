@@ -26,3 +26,7 @@ $model = Mage::getModel('adminhtml/config_data')
       ))
 ;
 $model->save();
+
+// reinit configuration
+Mage::getConfig()->reinit();
+Mage::app()->reinitStores();
