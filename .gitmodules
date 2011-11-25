@@ -1,0 +1,3 @@
+[submodule "vendor/php-selenium"]
+	path = vendor/php-selenium
+	url = https://github.com/alexandresalome/PHP-Selenium.git
