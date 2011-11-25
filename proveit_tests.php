@@ -61,8 +61,37 @@ class myQuickTest extends PHPUnit_Framework_TestCase
             ->waitForPageToLoad(self::TIMEOUT)
         ;
 
+        // Check URL
         $location = self::$browser->getLocation();
         $this->assertRegexp('#/voitures/voiture-de-course\.html$#', $location);
+
+        // Check title
+        $xpath = '//div[@class="product-name"]//h1';
+        $this->assertEquals(1, self::$browser->getXpathCount($xpath));
+        $this->assertEquals("Voiture de course", self::$browser->getText(Selenium\Locator::xpath($xpath)));
+    }
+
+    public function testCartToCheckout()
+    {
+        self::$browser
+            ->open('/voitures/voiture-de-course.html')
+            ->waitForPageToLoad(self::TIMEOUT)
+        ;
+
+        self::$browser
+            ->click(Selenium\Locator::css('div.add-to-cart button'))
+            ->waitForPageToLoad(self::TIMEOUT)
+        ;
+
+        $expected = 'Voiture de course was added to your shopping cart.';
+        $actual   = self::$browser->getText(Selenium\Locator::css('ul.messages li.success-msg span'));
+
+        $this->assertEquals($expected, $actual);
+
+        self::$browser
+            ->click(Selenium\Locator::css('ul.checkout-types button.btn-checkout'))
+            ->waitForPageToLoad(self::TIMEOUT)
+        ;
     }
 
     public static function tearDownAfterClass()
